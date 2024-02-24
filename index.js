@@ -1,0 +1,82 @@
+const express = require('express');
+const createError = require('http-errors');
+const app = express();
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const http = require('http');
+const cors = require('cors');
+require('dotenv').config();
+// config db
+require('./config/db');
+app.use(require('morgan')('dev'));
+
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+
+const session = require('express-session');
+const parameterHandler = require('./controller/parameterHandler');
+const MongoStore = require('connect-mongo');
+
+// const MongoDBStore = require('connect-mongodb-session')(session);
+
+
+const router = require('./routes');
+const errorHandler = require('./config/errorHandler');
+const User = require('./models/User');
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+app.use(cookieParser());
+// require('./config/passport');
+app.use(cors());
+
+
+const store = MongoStore.create({ mongoUrl: process.env.MONGO_DB_URL });
+const sessionMiddleware = session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: true, store })
+app.use(sessionMiddleware);
+
+const strategy = new LocalStrategy({
+  usernameField: 'mobile',
+  passwordField: 'password',
+}, User.authenticate())
+passport.use(strategy);
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+app.use(passport.initialize());
+app.use(passport.session());
+
+const server = http.createServer(app);
+
+
+
+app.use(parameterHandler);
+app.use("/api", router);
+app.use(errorHandler)
+
+
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+  next(createError(404));
+});
+
+// error handler
+app.use(function (err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500).json({ success: false, message: '404 Not Found' });
+
+});
+
+
+
+
+
+socketService.config(server, { matchScore });
+
+server.listen(process.env.PORT || 8000, () => {
+  console.log(`Server listening on port ${process.env.PORT || 8000}`);
+})
