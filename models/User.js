@@ -33,7 +33,7 @@ const schema = new mongoose.Schema({
     enum: ['User','Pro','Admin'],
     default: 'User'
   },
-  isActive
+  isActive:{type:Boolean,default:true},
 });
 
 schema.add(commonSchema);

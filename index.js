@@ -6,6 +6,8 @@ const cookieParser = require('cookie-parser');
 const http = require('http');
 const cors = require('cors');
 require('dotenv').config();
+const multer = require("multer");
+
 // config db
 require('./config/db');
 app.use(require('morgan')('dev'));
@@ -46,9 +48,25 @@ passport.deserializeUser(User.deserializeUser());
 app.use(passport.initialize());
 app.use(passport.session());
 
-const server = http.createServer(app);
 
+const storageEngine = multer.diskStorage({
+    destination: "./multimedia",
+    filename: (req, file, cb) => {
+      cb(null, `${Date.now()}--${file.originalname}`);
+    },
+  });
+  //initializing multer
+const upload = multer({
+    storage: storageEngine,
+  });
 
+  app.post("/single", upload.single("image"), (req, res) => {
+    if (req.file) {
+        res.send("Single file uploaded successfully");
+      } else {
+        res.status(400).send("Please upload a valid image");
+      }
+    });
 
 app.use(parameterHandler);
 app.use("/api", router);
@@ -74,9 +92,6 @@ app.use(function (err, req, res, next) {
 
 
 
-
-socketService.config(server, { matchScore });
-
-server.listen(process.env.PORT || 8000, () => {
+app.listen(process.env.PORT || 8000, () => {
   console.log(`Server listening on port ${process.env.PORT || 8000}`);
 })
