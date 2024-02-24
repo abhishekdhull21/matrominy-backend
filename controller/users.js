@@ -1,5 +1,4 @@
 const User = require("../models/User");
-const { http, USER_CREATE_AUTHORIZED_USER_MAP } = require("../utils");
 const { validator } = require("../utils/common");
 
 module.exports.register = async (req, res, next) => {
@@ -7,25 +6,27 @@ module.exports.register = async (req, res, next) => {
   // const userMeta = { username:req.parameter?.username, password:req.parameter?.password };
 
   try {
+  
 
     const user = new User(req.parameter);
+    let userValidateRes = validator.isValidUser(req.parameter);
 
     console.log("validating user...");
     if (userValidateRes?.isValid) {
-
+      
       User.register(user, req.parameter.password, function (err, msg) {
         console.log("control inside the ", msg);
 
         if (err) {
           return next(err);
         } else {
-          return res.status(http.statusCode[201]).json({ success: true, message: 'User created successfully' });
+          return res.status(201).json({ success: true, message: 'User created successfully' });
         }
       }
       );
 
     }
-    return res.status(http.statusCode[401]).json(userValidateRes);
+    return res.status(401).json(userValidateRes);
   } catch (err) {
     next(err)
   }
