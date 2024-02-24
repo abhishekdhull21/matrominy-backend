@@ -1,6 +1,5 @@
 const { mongoose } = require("mongoose");
-
-
+const { userValidSchema} = require("../config/validatorSchema")
 
 
 module.exports.isValidObjectId = (value) => {
@@ -31,4 +30,18 @@ module.exports.toString = (data) => {
 
 module.exports.isAuthenticated = (req, res, next) => {
   return (req.isAuthenticated()) ? next() : next({ status: 401, message: 'Unauthenticated Request' });
+}
+
+module.exports.validator = {
+  isValidUser: (user = {}) => {
+    let validationResult = userValidSchema.validate(user, { abortEarly: false, allowUnknown: true });
+    let error = null;
+    if (validationResult?.error) {
+      error = validationResult?.error?.details.reduce((acc, field) => {
+        return [...acc, { message: field.message }]
+      }, []);
+      return { error, isValid: false }
+    }
+    return { error, isValid: true }
+  },
 }
