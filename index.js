@@ -3,7 +3,6 @@ const createError = require('http-errors');
 const app = express();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const http = require('http');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -31,7 +30,12 @@ app.use(bodyParser.json());
 
 app.use(cookieParser());
 // require('./config/passport');
-app.use(cors());
+app.use(cors(
+  {
+    origin: ["http://localhost:3000", ...(process.env.CORS_APPROVED_URLS || [])],
+    credentials: true
+  }
+));
 
 
 const store = MongoStore.create({ mongoUrl: process.env.MONGO_DB_URL });
@@ -50,6 +54,10 @@ app.use(passport.session());
 
 
 
+
+app.get("/api/auth",(req,res,next)=>{
+  return res.json({success: req.isAuthenticated()})
+})
 
   app.post("/upload", upload.single("image"), (req, res) => {
     if (req.file) {
