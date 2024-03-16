@@ -32,5 +32,14 @@ commonSchema.pre('updateMany', function (next) {
   this.updatedAt = new Date();
   next();
 });
+commonSchema.pre('findOneAndUpdate', function (next) {
+  this.updatedAt = new Date();
+  next();
+});
+
+commonSchema.statics.getCount = function(condition){
+  return this.countDocuments(condition);
+
+}
 
 module.exports = commonSchema;

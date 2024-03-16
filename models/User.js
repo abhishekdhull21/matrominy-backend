@@ -7,7 +7,8 @@ const commonSchema = require('./common');
 
 const schema = new mongoose.Schema({
   email:{type: String, required: true},
-
+  name:String,
+  last:String,
   username: {
     type: String,
     required: true,
@@ -15,9 +16,9 @@ const schema = new mongoose.Schema({
   mobile: {
     type: String,
     unique: function () { return (this.mobile !== null && this.mobile !== undefined && this.mobile.trim() !== '') },
-    required: function () { return this.role !== USER_ROLES.PLAYER; },
   },
-  
+  images:[{type:String}],
+  bio:{type: String },
   dob:{type:Date},
   gender:{type:String,required: true, enum:['Male', 'Female'], default:'Male'},
   lookingFor:{type:String,required: true, enum:['Male', 'Female'],default:'Female'},
@@ -29,11 +30,14 @@ const schema = new mongoose.Schema({
     country:String,
   },
   role: {
-    type: Number,
+    type: String,
     enum: ['User','Pro','Admin'],
     default: 'User'
   },
   isActive:{type:Boolean,default:true},
+  profileViewUpto:Number,
+  profileViewed:{type:Number,default:0},
+
 });
 
 schema.add(commonSchema);
@@ -103,6 +107,49 @@ schema.statics.getUsers = async function ({ condition, page = 1, pageSize = 10, 
   }
 };
 
-const User = mongoose.model('User', schema);
+schema.statics.viewProfile = async function ({ userID} = {}) {
+  console.log("Control inside the viewProfile");
+
+  const fields = {
+      name:1,
+      lastName:1,
+      username:1,
+      gender:1,
+      images:1,
+      bio:1,
+  };
+  try {
+    const user = await this.findById(userID,fields);
+    return user;
+  } catch (error) {
+    console.error('Error in getUsers:', error.message);
+    throw error;
+  }
+};
+
+schema.statics.updateProfile = function(id,updateFields){
+  const update = {};
+  if(updateFields.image){
+    update['$addToSet'] = {images:updateFields.image};
+    delete updateFields.image;
+  
+  }
+  update['$set'] = {...updateFields}
+  return this.findOneAndUpdate({_id:id},update);
+}
+
+schema.statics.increaseProfileViewed = async function ({ userID} = {}) {
+  try {
+    console.log("Control inside the viewProfile");
+    const user = await this.findById(userID);
+    user.profileViewed = (user.profileViewed || 0) + 1;
+    user.save();
+  } catch (error) {
+    console.error('Error in getUsers:', error.message);
+    throw error;
+  }
+};
+
+const User = mongoose.model('user', schema);
 
 module.exports = User;

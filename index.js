@@ -6,7 +6,6 @@ const cookieParser = require('cookie-parser');
 const http = require('http');
 const cors = require('cors');
 require('dotenv').config();
-const multer = require("multer");
 
 // config db
 require('./config/db');
@@ -25,6 +24,7 @@ const MongoStore = require('connect-mongo');
 const router = require('./routes');
 const errorHandler = require('./config/errorHandler');
 const User = require('./models/User');
+const { upload } = require('./config/Uploader');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -49,20 +49,12 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
-const storageEngine = multer.diskStorage({
-    destination: "./multimedia",
-    filename: (req, file, cb) => {
-      cb(null, `${Date.now()}--${file.originalname}`);
-    },
-  });
-  //initializing multer
-const upload = multer({
-    storage: storageEngine,
-  });
 
-  app.post("/single", upload.single("image"), (req, res) => {
+
+  app.post("/upload", upload.single("image"), (req, res) => {
     if (req.file) {
-        res.send("Single file uploaded successfully");
+
+        res.send({success:true,url:req.file.destination+req.file.filename,info:req.file,message:"file uploaded successfully"});
       } else {
         res.status(400).send("Please upload a valid image");
       }
