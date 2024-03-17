@@ -30,12 +30,12 @@ app.use(bodyParser.json());
 
 app.use(cookieParser());
 // require('./config/passport');
-app.use(cors(
-  {
-    origin: ["http://localhost:3000", ...(process.env.CORS_APPROVED_URLS || [])],
-    credentials: true
-  }
-));
+const corsOptions ={
+  origin:'http://localhost:3000', 
+  credentials:true,            //access-control-allow-credentials:true
+  optionSuccessStatus:200
+}
+app.use(cors(corsOptions));
 
 
 const store = MongoStore.create({ mongoUrl: process.env.MONGO_DB_URL });

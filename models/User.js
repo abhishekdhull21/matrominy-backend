@@ -11,7 +11,7 @@ const schema = new mongoose.Schema({
   last:String,
   username: {
     type: String,
-    required: true,
+    // required: true,
   },
   mobile: {
     type: String,
