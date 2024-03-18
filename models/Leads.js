@@ -15,6 +15,9 @@ schema.statics.saveLead = function(leadData){
     const lead = new this(leadData);
     return lead.save();
 }
+schema.statics.getLead = function(condition){
+    return this.find(condition);
+}
 
 schema.statics.findAndUpdateLead = function(userID,profileViewed){
     return this.findOneAndUpdate({userID,profileViewed},{updatedAt: new Date()},{upsert:true});

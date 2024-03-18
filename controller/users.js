@@ -38,6 +38,33 @@ module.exports.register = async (req, res, next) => {
   }
 };
 
+module.exports.getProfiles = async(req, res, next)=>{
+  console.log("control inside the getProfiles")
+  const user = req.user;
+  const condition = {
+    lookingFor: user.gender,
+    gender:user.lookingFor,
+    isActive:true,
+  };
+try{
+
+  const users = await User.getUsers({
+    condition
+  },{
+    name:1,
+    last:1,
+    username:1,
+    gender:1,
+    dob:1,
+    images:1
+  });
+  return res.json({success:true, profiles:users});
+}catch(e){
+  return next({status:401,error:e?.message || "something went wrong"})
+}
+
+}
+
 module.exports.login = async (mobile, password) => {
   console.log("control inside login...");
   let user = await User.find({ mobile });
@@ -112,7 +139,7 @@ module.exports.getUsers = async (req, res, next) => {
 // View Profile
 module.exports.viewProfile = async function (req, res, next) {
   // check user pro or not
-  const user = req.User;
+  const user = req.user;
   const profileUserId = req.params["id"];
   if (!profileUserId) {
     return next({
@@ -121,7 +148,7 @@ module.exports.viewProfile = async function (req, res, next) {
     });
   }
   if (!(await isProUser(user))) {
-    if (user.profileViewed >= noOfProfilesUserView(user.profileViewUpto)) {
+    if ((user?.profileViewed || 0) >= noOfProfilesUserView(user?.profileViewUpto)) {
       return next({
         status: 401,
         message: "Bad Request:You need to buy Pro to view more profiles",
@@ -129,8 +156,17 @@ module.exports.viewProfile = async function (req, res, next) {
     }
   }
 
-  const profile = await User.viewProfile();
-  await increaseProfileViewed();
+  const profile = await User.viewProfile({userID:profileUserId});
+  const leadCondition = {
+    type:LeadType.PROFILE_VIEW,
+    profileViewed:profileUserId,
+    userID:user._id
+  }
+  const leadInDB = await Lead.getLead(leadCondition);
+  if(!leadInDB.length){
+    await User.increaseProfileViewed({userID:user._id});
+  }
+  Lead.saveLead(leadCondition)
   return res.status(200).json({ success: true, profile });
 };
 // Favorite Profile

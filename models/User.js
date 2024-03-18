@@ -67,19 +67,19 @@ schema.pre('save', function (next) {
   }
 });
 
-const defineProjection = (role) => {
-  let projectionField = {}
-  switch (role) {
-    case USER_ROLES.SUPER_ADMIN:
-    case USER_ROLES.ADMIN:
-      break;
-    case USER_ROLES.USER:
-      projectionField = { _id: 1, username: 1, mobile: 1 }; // Define fields accessible to regular users
-      break;
-  }
+// const defineProjection = (role) => {
+//   let projectionField = {}
+//   switch (role) {
+//     case USER_ROLES.SUPER_ADMIN:
+//     case USER_ROLES.ADMIN:
+//       break;
+//     case USER_ROLES.USER:
+//       projectionField = { _id: 1, username: 1, mobile: 1 }; // Define fields accessible to regular users
+//       break;
+//   }
 
-  return projectionField;
-};
+//   return projectionField;
+// };
 schema.methods.validPassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
@@ -95,8 +95,9 @@ schema.statics.getUsers = async function ({ condition, page = 1, pageSize = 10, 
 
     const skip = (page - 1) * pageSize;
 
-    const projection = defineProjection(currentUserRole);
-    const users = await this.find(condition, projection)
+    // const projection = defineProjection(currentUserRole);
+    // const users = await this.find(condition, projection)
+    const users = await this.find(condition)
       .skip(skip)
       .limit(pageSize);
 
