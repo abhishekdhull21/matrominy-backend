@@ -16,7 +16,7 @@ const schema = new mongoose.Schema({
   },
   mobile: {
     type: String,
-    unique: function () { return (this.mobile !== null && this.mobile !== undefined && this.mobile.trim() !== '') },
+    // unique: function () { return (this.mobile !== null && this.mobile !== undefined && this.mobile.trim() !== '') },
   },
   age: Number,
   images:[{type:String}],
