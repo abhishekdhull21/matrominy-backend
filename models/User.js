@@ -6,7 +6,7 @@ const passportLocalMongoose = require('passport-local-mongoose');
 const commonSchema = require('./common');
 
 const schema = new mongoose.Schema({
-  email:{type: String, required: true},
+  email:{type: String},
   name:String,
   last:String,
   username: {
