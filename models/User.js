@@ -4,6 +4,7 @@ const passportLocalMongoose = require('passport-local-mongoose');
 
 
 const commonSchema = require('./common');
+const { number } = require('joi');
 
 const schema = new mongoose.Schema({
   email:{type: String},
@@ -17,9 +18,17 @@ const schema = new mongoose.Schema({
     type: String,
     unique: function () { return (this.mobile !== null && this.mobile !== undefined && this.mobile.trim() !== '') },
   },
+  age: Number,
   images:[{type:String}],
   bio:{type: String },
   dob:{type:Date},
+  hobby:String,
+  personType: String,
+  height:Number,
+  weight: Number,
+  hairColor: String,
+  eyeColor: String,
+  bodyType:String,
   gender:{type:String,required: true, enum:['Male', 'Female'], default:'Male'},
   lookingFor:{type:String,required: true, enum:['Male', 'Female'],default:'Female'},
   isSingle:{type:Boolean,default:true},
@@ -29,6 +38,7 @@ const schema = new mongoose.Schema({
     state:String,
     country:String,
   },
+
   role: {
     type: String,
     enum: ['User','Pro','Admin'],
