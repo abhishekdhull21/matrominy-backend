@@ -23,8 +23,8 @@ const schema = new mongoose.Schema({
   dob: { type: Date },
   hobby: String,
   personType: String,
-  height: Number,
-  weight: Number,
+  height: String,
+  weight: String,
   hairColor: String,
   eyeColor: String,
   bodyType: String,
@@ -135,17 +135,37 @@ schema.statics.getUsers = async function ({
   }
 };
 
-schema.statics.viewProfile = async function ({ userID } = {}) {
+schema.statics.viewProfile = async function ({ userID,isSelf } = {}) {
   console.log("Control inside the viewProfile");
 
-  const fields = {
+  let fields = {
     name: 1,
-    lastName: 1,
+    last: 1,
     username: 1,
     gender: 1,
     images: 1,
     bio: 1,
+    age:1
   };
+  if(isSelf){
+    fields = {
+      ...fields,
+      mobile:1,
+      email:1,
+      lookingFor:1,
+      isSingle:1,
+      address:1,
+      lifestyle:1,
+      hobby:1,
+      personType:1,
+      height:1,
+      weight:1,
+      hairColor: 1,
+      eyeColor: 1,
+      bodyType: 1,
+      ethnicity: 1,
+    }
+  }
   try {
     const user = await this.findById(userID, fields);
     return user;

@@ -19,6 +19,7 @@ userRouter.get('/profile/:id',viewProfile);
 userRouter.get('/profile',viewProfile);
 userRouter.get('/profiles',getProfiles);
 userRouter.put('/profile/:id',updateProfile);
+userRouter.put('/profile',updateProfile);
 
 // userNoAuthRouter.get('/:id', getUsers);
 module.exports = { userRouter, userNoAuthRouter }; 

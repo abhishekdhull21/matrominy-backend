@@ -38,32 +38,33 @@ module.exports.register = async (req, res, next) => {
   }
 };
 
-module.exports.getProfiles = async(req, res, next)=>{
-  console.log("control inside the getProfiles")
+module.exports.getProfiles = async (req, res, next) => {
+  console.log("control inside the getProfiles");
   const user = req.user;
   const condition = {
     lookingFor: user.gender,
-    gender:user.lookingFor,
-    isActive:true,
+    gender: user.lookingFor,
+    isActive: true,
   };
-try{
-
-  const users = await User.getUsers({
-    condition
-  },{
-    name:1,
-    last:1,
-    username:1,
-    gender:1,
-    dob:1,
-    images:1
-  });
-  return res.json({success:true, profiles:users});
-}catch(e){
-  return next({status:401,error:e?.message || "something went wrong"})
-}
-
-}
+  try {
+    const users = await User.getUsers(
+      {
+        condition,
+      },
+      {
+        name: 1,
+        last: 1,
+        username: 1,
+        gender: 1,
+        dob: 1,
+        images: 1,
+      }
+    );
+    return res.json({ success: true, profiles: users });
+  } catch (e) {
+    return next({ status: 401, error: e?.message || "something went wrong" });
+  }
+};
 
 module.exports.login = async (mobile, password) => {
   console.log("control inside login...");
@@ -141,14 +142,17 @@ module.exports.viewProfile = async function (req, res, next) {
   // check user pro or not
   const user = req.user;
   const profileUserId = req.params["id"] || user._id;
+  const isSelf = profileUserId === user._id;
   if (!profileUserId) {
     return next({
       status: 401,
       message: "Bad Request: Invalid requested profile",
     });
   }
-  if (!(await isProUser(user))) {
-    if ((user?.profileViewed || 0) >= noOfProfilesUserView(user?.profileViewUpto)) {
+  if (!isSelf && !(await isProUser(user))) {
+    if (
+      (user?.profileViewed || 0) >= noOfProfilesUserView(user?.profileViewUpto)
+    ) {
       return next({
         status: 401,
         message: "Bad Request:You need to buy Pro to view more profiles",
@@ -156,17 +160,19 @@ module.exports.viewProfile = async function (req, res, next) {
     }
   }
 
-  const profile = await User.viewProfile({userID:profileUserId});
+  const profile = await User.viewProfile({ userID: profileUserId,isSelf });
   const leadCondition = {
-    type:LeadType.PROFILE_VIEW,
-    profileViewed:profileUserId,
-    userID:user._id
+    type: LeadType.PROFILE_VIEW,
+    profileViewed: profileUserId,
+    userID: user._id,
+  };
+  if (!isSelf) {
+    const leadInDB = await Lead.getLead(leadCondition);
+    if (!leadInDB.length) {
+      await User.increaseProfileViewed({ userID: user._id });
+    }
+    Lead.saveLead(leadCondition);
   }
-  const leadInDB = await Lead.getLead(leadCondition);
-  if(!leadInDB.length){
-    await User.increaseProfileViewed({userID:user._id});
-  }
-  Lead.saveLead(leadCondition)
   return res.status(200).json({ success: true, profile });
 };
 // Favorite Profile
@@ -197,7 +203,7 @@ module.exports.updateProfile = async function (req, res, next) {
   // check user pro or not
   const user = req.User;
   const fieldsToUpdate = req.parameter.fields;
-  const profileUserId = req.params["id"];
+  const profileUserId = req.params["id"] || req.user._id;
   if (!profileUserId) {
     return next({
       status: 401,
@@ -218,74 +224,77 @@ module.exports.updateProfile = async function (req, res, next) {
 module.exports.getFavoriteProfile = async function (req, res, next) {
   // check user pro or not
   const user = req.user;
-  try{
-    const favorites = await Favorite.getAll({userID:user._id, isFavorite:true});
-    return res.status(200).json({ success:true,favorites: favorites});
-  }catch(err){
+  try {
+    const favorites = await Favorite.getAll({
+      userID: user._id,
+      isFavorite: true,
+    });
+    return res.status(200).json({ success: true, favorites: favorites });
+  } catch (err) {
     return next({ status: 401, message: err.message || err });
   }
-
-}
+};
 
 // View Favorite Profile Count
 module.exports.getCount = async function (req, res, next) {
   console.log("control inside the getCount");
-  
+
   // check user pro or not
   const user = req.user;
   const type = req.parameter.type;
-  if(!type){
-    return next({ status: 401, message:'count not specified'});
+  if (!type) {
+    return next({ status: 401, message: "count not specified" });
   }
-  try{
-    return res.status(200).json({ success:true,count: await getCount(type,user._id)});
-  }catch(err){
+  try {
+    return res
+      .status(200)
+      .json({ success: true, count: await getCount(type, user._id) });
+  } catch (err) {
     return next({ status: 401, message: err.message || err });
   }
+};
 
-}
-
-async function getCount(type, id){
+async function getCount(type, id) {
   let docCount = 0;
-    // count of favorite of my profile by others
-    if (type == LeadCountType.FAVORITE_ME_BY_OTHERS) {
-      // this give the count of favorites by other users
-      docCount = await Favorite.getCount({
-        userID: id,
-        isFavorite: true,
-      });
-    } else if (type == LeadCountType.FAVORITE_OTHERS_BY_ME) {
-      docCount = await Favorite.getCount({
-        favoriteProfile: id,
-        isFavorite: true,
-      });
+  // count of favorite of my profile by others
+  if (type == LeadCountType.FAVORITE_ME_BY_OTHERS) {
+    // this give the count of favorites by other users
+    docCount = await Favorite.getCount({
+      userID: id,
+      isFavorite: true,
+    });
+  } else if (type == LeadCountType.FAVORITE_OTHERS_BY_ME) {
+    docCount = await Favorite.getCount({
+      favoriteProfile: id,
+      isFavorite: true,
+    });
+  } else if (type == LeadCountType.PROFILE_VIEW_BY_ME) {
+    docCount = await Lead.getCount({
+      type: LeadType.PROFILE_VIEW,
+      userID: id,
+    });
+  } else if (type == LeadCountType.PROFILE_MY_VIEW_BY_OTHERS) {
+    docCount = await Lead.getCount({
+      type: LeadType.PROFILE_VIEW,
+      profileViewed: id,
+    });
+  }
 
-    } else if (type == LeadCountType.PROFILE_VIEW_BY_ME) {
-      docCount = await Lead.getCount({
-        type:LeadType.PROFILE_VIEW,
-        userID: id,
-      });
-
-    }  else if (type == LeadCountType.PROFILE_MY_VIEW_BY_OTHERS) {
-      docCount = await Lead.getCount({
-        type:LeadType.PROFILE_VIEW,
-        profileViewed: id,
-      });
-
-    } 
-
-    return docCount;
+  return docCount;
 }
 
 // View Favorite Profile Count
 module.exports.getFavoriteProfileCount = async function (req, res, next) {
   // check user pro or not
   const user = req.user;
-  try{
+  try {
     // this give the count of favorites by other users
-    const favorites = await Favorite.getCount({userID:user._id, isFavorite:true});
-    return res.status(200).json({ success:true,count: favorites});
-  }catch(err){
+    const favorites = await Favorite.getCount({
+      userID: user._id,
+      isFavorite: true,
+    });
+    return res.status(200).json({ success: true, count: favorites });
+  } catch (err) {
     return next({ status: 401, message: err.message || err });
   }
-}
+};
