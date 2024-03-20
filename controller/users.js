@@ -140,7 +140,7 @@ module.exports.getUsers = async (req, res, next) => {
 module.exports.viewProfile = async function (req, res, next) {
   // check user pro or not
   const user = req.user;
-  const profileUserId = req.params["id"];
+  const profileUserId = req.params["id"] || user._id;
   if (!profileUserId) {
     return next({
       status: 401,

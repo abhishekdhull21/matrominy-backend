@@ -16,6 +16,7 @@ userRouter.get('/count/of',getCount);
 userRouter.post('/favorite',favoriteProfile);
 userRouter.get('/favorite/all',getFavoriteProfile);
 userRouter.get('/profile/:id',viewProfile);
+userRouter.get('/profile',viewProfile);
 userRouter.get('/profiles',getProfiles);
 userRouter.put('/profile/:id',updateProfile);
 
