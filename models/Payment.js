@@ -12,9 +12,9 @@ const schema = new mongoose.Schema({
 
 schema.add(commonSchema);
 
-schema.statics.saveLead = function(paymentInfo){
-    const lead = new this(paymentInfo);
-    return lead.save();
+schema.statics.savePayment = function(paymentInfo){
+    const payment = new this(paymentInfo);
+    return payment.save();
 }
 
 const Payment = mongoose.model('payment', schema);
