@@ -56,7 +56,7 @@ app.use(passport.session());
 
 
 app.get("/api/auth",(req,res,next)=>{
-  return res.json({success: req.isAuthenticated()})
+  return res.json({success: req.isAuthenticated(),user:req.isAuthenticated() ? {id:req.user?._id, username:req.user?.username, name:`${req.user?.name ||""} ${req.user?.last || ""}`.trim(), role:req.user?.role} : null})
 })
 
   app.post("/upload", upload.single("image"), (req, res) => {
