@@ -64,6 +64,7 @@ const sessionMiddleware = session({
   cookie: {
     SameSite: "none",
     sameSite: "none",
+    secure:false,
     maxAge: 1000 * 60 * 60 * 60,
   },
 });
