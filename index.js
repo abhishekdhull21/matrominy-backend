@@ -45,7 +45,7 @@ const setSessionCookieMiddleware = (req, res, next) => {
   if (req.cookies['connect.sid']) {
     // Set the session cookie
     res.cookie('connect.sid', req.cookies['connect.sid'], {
-      sameSite: 'None', // Set SameSite attribute to None for cross-site requests
+      SameSite: 'None', // Set SameSite attribute to None for cross-site requests
     });
   }
   
@@ -63,6 +63,7 @@ const sessionMiddleware = session({
   store,
   cookie: {
     SameSite: "none",
+    sameSite: "none",
     maxAge: 1000 * 60 * 60 * 60,
   },
 });
