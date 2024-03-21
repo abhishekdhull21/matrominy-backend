@@ -30,9 +30,9 @@ app.use(bodyParser.json());
 
 app.use(cookieParser());
 // require('./config/passport');
-console.log(`["http://localhost:3000", ...(process.env.CORS_APPROVED_URLS || [])]`,["http://localhost:3000", ...(process.env.CORS_APPROVED_URLS || [])])
+console.log(`["http://localhost:3000", ...(process.env.CORS_APPROVED_URLS || [])]`,process.env.CORS_APPROVED_URLS )
 const corsOptions ={
-  origin: ["http://localhost:3000", ...(process.env.CORS_APPROVED_URLS || [])],
+  origin:process.env.CORS_APPROVED_URLS,
   credentials:true,            //access-control-allow-credentials:true
   optionSuccessStatus:200
 }
