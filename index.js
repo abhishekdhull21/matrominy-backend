@@ -39,6 +39,22 @@ const corsOptions ={
 app.use(cors(corsOptions));
 
 
+// Custom middleware to set the session cookie
+const setSessionCookieMiddleware = (req, res, next) => {
+  // Check if the session cookie already exists
+  if (req.cookies['connect.sid']) {
+    // Set the session cookie
+    res.cookie('connect.sid', req.cookies['connect.sid'], {
+      sameSite: 'None', // Set SameSite attribute to None for cross-site requests
+    });
+  }
+  
+  next(); // Call next to pass control to the next middleware or route handler
+};
+
+// Apply the custom middleware to all routes
+app.use(setSessionCookieMiddleware);
+
 const store = MongoStore.create({ mongoUrl: process.env.MONGO_DB_URL });
 const sessionMiddleware = session({
   secret: process.env.SESSION_SECRET,
