@@ -65,7 +65,7 @@ const sessionMiddleware = session({
     SameSite: "none",
     sameSite: "none",
     httpOnly:false,
-    secure:'auto',
+    secure:true,
     maxAge: 1000 * 60 * 60 * 60,
   },
 });
