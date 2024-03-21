@@ -57,8 +57,24 @@ const strategy = new LocalStrategy({
   passwordField: 'password',
 }, User.authenticate())
 passport.use(strategy);
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+passport.serializeUser(function(user, done) {
+  // Set the SameSite attribute to None for the cookie
+  const cookieOptions = {
+    sameSite: 'None'
+    // Other cookie options...
+  };
+  done(null, user.id, cookieOptions);
+});
+// passport.serializeUser(User.serializeUser());
+// passport.deserializeUser(User.deserializeUser());
+
+passport.deserializeUser(async function(id, done) {
+  const user = User.findById(id);
+  if(user){
+    return done(null, user);
+  }
+  done({error: 'Authentication failed'});
+});
 app.use(passport.initialize());
 app.use(passport.session());
 
