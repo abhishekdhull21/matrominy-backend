@@ -40,7 +40,16 @@ app.use(cors(corsOptions));
 
 
 const store = MongoStore.create({ mongoUrl: process.env.MONGO_DB_URL });
-const sessionMiddleware = session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: true, store })
+const sessionMiddleware = session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  store,
+  cookie: {
+    SameSite: "none",
+    maxAge: 1000 * 60 * 60 * 60,
+  },
+});
 app.use(sessionMiddleware);
 
 const strategy = new LocalStrategy({
