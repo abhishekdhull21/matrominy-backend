@@ -52,23 +52,30 @@ const setSessionCookieMiddleware = (req, res, next) => {
   next(); // Call next to pass control to the next middleware or route handler
 };
 
+if(process.env.ENABLE_SESSION_COOKIE_MIDDLEWARE){
 // Apply the custom middleware to all routes
 app.use(setSessionCookieMiddleware);
-
+}
 const store = MongoStore.create({ mongoUrl: process.env.MONGO_DB_URL });
-const sessionMiddleware = session({
+
+const sessionOptions = {
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
   store,
-  cookie: {
+  cookie: {}
+}
+
+if (app.get('env') === 'production' || process.env.IS_PRODUCTION ) {
+  sessionOptions.cookie = {
     SameSite: "none",
     sameSite: "none",
-    httpOnly:false,
-    secure:'auto',
+    secure:true,
     maxAge: 1000 * 60 * 60 * 60,
-  },
-});
+  }
+}
+
+const sessionMiddleware = session(sessionOptions);
 app.use(sessionMiddleware);
 
 const strategy = new LocalStrategy({
@@ -76,24 +83,11 @@ const strategy = new LocalStrategy({
   passwordField: 'password',
 }, User.authenticate())
 passport.use(strategy);
-passport.serializeUser(function(user, done) {
-  // Set the SameSite attribute to None for the cookie
-  const cookieOptions = {
-    sameSite: 'None'
-    // Other cookie options...
-  };
-  done(null, user.id, cookieOptions);
-});
-// passport.serializeUser(User.serializeUser());
-// passport.deserializeUser(User.deserializeUser());
 
-passport.deserializeUser(async function(id, done) {
-  const user = User.findById(id);
-  if(user){
-    return done(null, user);
-  }
-  done({error: 'Authentication failed'});
-});
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -127,7 +121,7 @@ app.use(function (req, res, next) {
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.error = req.app.get('env') === 'development' && !process.env.IS_PRODUCTION ? err : {};
 
   // render the error page
   res.status(err.status || 500).json({ success: false, message: '404 Not Found' });
