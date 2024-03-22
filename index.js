@@ -67,9 +67,9 @@ const sessionOptions = {
 }
 
 if (app.get('env') === 'production' || process.env.IS_PRODUCTION ) {
+  console.log("production environment")
   sessionOptions.cookie = {
     SameSite: "none",
-    sameSite: "none",
     secure:true,
     maxAge: 1000 * 60 * 60 * 60,
   }
