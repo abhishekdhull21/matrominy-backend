@@ -7,7 +7,15 @@ const userRouter = express.Router();
 const userNoAuthRouter = express.Router();
 
 // Public Auth Route
-userNoAuthRouter.post('/login', passport.authenticate('local'),(req,res,next) => { res.json({success:true})});
+userNoAuthRouter.post(
+  "/login",
+  passport.authenticate("local"),
+  (req, res, next) => {
+    console.log("user: ",req?.cookies)
+    res.setHeader('c-cookie',req?.cookies['connect.sid'])
+    return res.json({ success: true });
+  }
+);
 userNoAuthRouter.post('/signup',register);
 // userNoAuthRouter.get('/', viewProfile);
 

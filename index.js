@@ -29,10 +29,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use(cookieParser());
+app.use(parameterHandler);
 // require('./config/passport');
-console.log(`["http://localhost:3000", ...(process.env.CORS_APPROVED_URLS || [])]`,process.env.CORS_APPROVED_URLS )
+console.log(`process.env.CORS_APPROVED_URLS`,process.env.CORS_APPROVED_URLS );
 const corsOptions ={
-  origin:process.env.CORS_APPROVED_URLS,
+  origin:[process.env.CORS_APPROVED_URLS],
   credentials:true,            //access-control-allow-credentials:true
   optionSuccessStatus:200
 }
@@ -42,20 +43,19 @@ app.use(cors(corsOptions));
 // Custom middleware to set the session cookie
 const setSessionCookieMiddleware = (req, res, next) => {
   // Check if the session cookie already exists
-  if (req.cookies['connect.sid']) {
-    // Set the session cookie
-    res.cookie('connect.sid', req.cookies['connect.sid'], {
-      SameSite: 'None', // Set SameSite attribute to None for cross-site requests
-    });
+  
+  if(req.headers['C-Cookie'] || req.headers['c-cookie']){
+    req.cookies['connect.sid'] = req.headers['c-cookie'] || req.headers['C-Cookie'];
   }
   
+  req.cookies['connect.sid'] && res.setHeader('c-cookie', req.cookies['connect.sid']);
   next(); // Call next to pass control to the next middleware or route handler
 };
 
-if(process.env.ENABLE_SESSION_COOKIE_MIDDLEWARE){
+// if(process.env.ENABLE_SESSION_COOKIE_MIDDLEWARE){
 // Apply the custom middleware to all routes
 app.use(setSessionCookieMiddleware);
-}
+// }
 const store = MongoStore.create({ mongoUrl: process.env.MONGO_DB_URL });
 
 const sessionOptions = {
@@ -66,7 +66,8 @@ const sessionOptions = {
   cookie: {}
 }
 
-if (app.get('env') === 'production' || process.env.IS_PRODUCTION ) {
+console.log("current env: ", app.get('env'))
+if(app.get('env') === 'production' || process.env.IS_PRODUCTION === 'true' ) {
   console.log("production environment")
   sessionOptions.cookie = {
     SameSite: "none",
@@ -87,7 +88,6 @@ passport.use(strategy);
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -107,7 +107,7 @@ app.get("/api/auth",(req,res,next)=>{
       }
     });
 
-app.use(parameterHandler);
+
 app.use("/api", router);
 app.use(errorHandler)
 
