@@ -18,6 +18,7 @@ module.exports.register = async (req, res, next) => {
 
   try {
     const salt = await bcrypt.genSalt(10);
+    const {password} = req.parameter;
     const hashedPassword = await bcrypt.hash(password, salt);
     const user = new User({...req.parameter, password:hashedPassword});
     let userValidateRes = validator.isValidUser(req.parameter);
