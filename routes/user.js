@@ -16,7 +16,7 @@ const userNoAuthRouter = express.Router();
 //     return res.json({ success: true });
 //   }
 // );
-// userNoAuthRouter.post('/signup',register);
+userNoAuthRouter.post('/signup',register);
 // userNoAuthRouter.get('/', viewProfile);
 
   userNoAuthRouter.post(
