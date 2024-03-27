@@ -57,24 +57,24 @@ app.use(cors(corsOptions));
 // Apply the custom middleware to all routes
 // app.use(setSessionCookieMiddleware);
 // }
-const store = MongoStore.create({ mongoUrl: process.env.MONGO_DB_URL });
+// const store = MongoStore.create({ mongoUrl: process.env.MONGO_DB_URL });
 
-const sessionOptions = {
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: true,
-  store,
-  cookie: {}
-}
+// const sessionOptions = {
+//   secret: process.env.SESSION_SECRET,
+//   resave: false,
+//   saveUninitialized: true,
+//   store,
+//   cookie: {}
+// }
 
 console.log("current env: ", app.get('env'))
 // if(app.get('env') === 'production' || process.env.IS_PRODUCTION === 'true' ) {
   console.log("production environment")
-  sessionOptions.cookie = {
-    SameSite: "none",
-    secure:true,
-    maxAge: 1000 * 60 * 60 * 60,
-  }
+  // sessionOptions.cookie = {
+  //   SameSite: "none",
+  //   secure:true,
+  //   maxAge: 1000 * 60 * 60 * 60,
+  // }
 // }
 
 // const sessionMiddleware = session(sessionOptions);
@@ -92,11 +92,11 @@ console.log("current env: ", app.get('env'))
 // app.use(passport.initialize());
 // app.use(passport.session());
 
-app.use(isAuthenticated)
+app.use(isAuthenticated);
 
 
 app.get("/api/auth",(req,res,next)=>{
-  return res.json({success: req.isAuthenticated(),user:req.isAuthenticated() ? {id:req.user?._id, username:req.user?.username, name:`${req.user?.name ||""} ${req.user?.last || ""}`.trim(), role:req.user?.role} : null})
+  return res.json({success: req.isAuthenticated,user:req.isAuthenticated ? {id:req.user?._id, username:req.user?.username, name:`${req.user?.name ||""} ${req.user?.last || ""}`.trim(), role:req.user?.role} : null})
 })
 
   app.post("/upload", upload.single("image"), (req, res) => {
