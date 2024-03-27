@@ -37,7 +37,7 @@ module.exports.register = async (req, res, next) => {
       //   }
       // });
 
-      await User.save(user);
+      await user.save();
       const token = jwt.sign({ userId: user._id, role:user.role, isActive: user.isActive }, "secretKey", {
         expiresIn: "1h",
       });
