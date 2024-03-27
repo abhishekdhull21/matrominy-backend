@@ -2,22 +2,25 @@ const express = require('express');
 const passport = require('passport');
 
 
-const { register, getUsers, viewProfile, updateProfile, favoriteProfile, getFavoriteProfile, getFavoriteProfileCount, getCount, getProfiles } = require('../controller/users');
+const { register, getUsers, viewProfile, updateProfile, favoriteProfile, getFavoriteProfile, getFavoriteProfileCount, getCount, getProfiles, login } = require('../controller/users');
 const userRouter = express.Router();
 const userNoAuthRouter = express.Router();
 
 // Public Auth Route
-userNoAuthRouter.post(
-  "/login",
-  passport.authenticate("local"),
-  (req, res, next) => {
-    console.log("user: ",req?.cookies)
-    res.setHeader('c-cookie',req?.cookies['connect.sid'])
-    return res.json({ success: true });
-  }
-);
-userNoAuthRouter.post('/signup',register);
+// userNoAuthRouter.post(
+//   "/login",
+//   passport.authenticate("local"),
+//   (req, res, next) => {
+//     console.log("user: undefined",req.cookies['connect.sid']);
+//     res.setHeader('c-cookie',req?.cookies['connect.sid'])
+//     return res.json({ success: true });
+//   }
+// );
+// userNoAuthRouter.post('/signup',register);
 // userNoAuthRouter.get('/', viewProfile);
+
+  userNoAuthRouter.post(
+    "/login",login);
 
 // Private Auth Route
 userRouter.get('/count/of',getCount);

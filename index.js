@@ -24,6 +24,7 @@ const router = require('./routes');
 const errorHandler = require('./config/errorHandler');
 const User = require('./models/User');
 const { upload } = require('./config/Uploader');
+const { isAuthenticated } = require('./routes/auth');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -41,20 +42,20 @@ app.use(cors(corsOptions));
 
 
 // Custom middleware to set the session cookie
-const setSessionCookieMiddleware = (req, res, next) => {
-  // Check if the session cookie already exists
+// const setSessionCookieMiddleware = (req, res, next) => {
+//   // Check if the session cookie already exists
+//   console.log("req.headers['c-cookie'] ",req.headers['c-cookie'],req.headers['C-Cookie'],req.headers)
+//   if(req.headers['c-cookie'] && req.headers['c-cookie'] !== 'undefined'){
+//     req.cookies['connect.sid'] = req.headers['c-cookie'];
+//   }
   
-  if(req.headers['C-Cookie'] || req.headers['c-cookie']){
-    req.cookies['connect.sid'] = req.headers['c-cookie'] || req.headers['C-Cookie'];
-  }
-  
-  req.cookies['connect.sid'] && res.setHeader('c-cookie', req.cookies['connect.sid']);
-  next(); // Call next to pass control to the next middleware or route handler
-};
+//   req.cookies['connect.sid'] && res.setHeader('c-cookie', req.cookies['connect.sid']);
+//   next(); // Call next to pass control to the next middleware or route handler
+// };
 
 // if(process.env.ENABLE_SESSION_COOKIE_MIDDLEWARE){
 // Apply the custom middleware to all routes
-app.use(setSessionCookieMiddleware);
+// app.use(setSessionCookieMiddleware);
 // }
 const store = MongoStore.create({ mongoUrl: process.env.MONGO_DB_URL });
 
@@ -67,31 +68,31 @@ const sessionOptions = {
 }
 
 console.log("current env: ", app.get('env'))
-if(app.get('env') === 'production' || process.env.IS_PRODUCTION === 'true' ) {
+// if(app.get('env') === 'production' || process.env.IS_PRODUCTION === 'true' ) {
   console.log("production environment")
   sessionOptions.cookie = {
     SameSite: "none",
     secure:true,
     maxAge: 1000 * 60 * 60 * 60,
   }
-}
+// }
 
-const sessionMiddleware = session(sessionOptions);
-app.use(sessionMiddleware);
+// const sessionMiddleware = session(sessionOptions);
+// app.use(sessionMiddleware);
 
-const strategy = new LocalStrategy({
-  usernameField: 'mobile',
-  passwordField: 'password',
-}, User.authenticate())
-passport.use(strategy);
+// const strategy = new LocalStrategy({
+//   usernameField: 'mobile',
+//   passwordField: 'password',
+// }, User.authenticate())
+// passport.use(strategy);
 
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+// passport.serializeUser(User.serializeUser());
+// passport.deserializeUser(User.deserializeUser());
 
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.initialize());
+// app.use(passport.session());
 
-
+app.use(isAuthenticated)
 
 
 app.get("/api/auth",(req,res,next)=>{

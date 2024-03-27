@@ -63,6 +63,7 @@ const schema = new mongoose.Schema({
   },
   isActive: { type: Boolean, default: true },
   profileViewUpto: Number,
+  password:String,
   profileViewed: { type: Number, default: 0 },
 });
 

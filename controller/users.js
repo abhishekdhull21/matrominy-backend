@@ -1,6 +1,9 @@
 const Favorite = require("../models/Favorite");
 const Lead = require("../models/Leads");
 const User = require("../models/User");
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
 const {
   validator,
   isProUser,
@@ -14,22 +17,31 @@ module.exports.register = async (req, res, next) => {
   // const userMeta = { username:req.parameter?.username, password:req.parameter?.password };
 
   try {
-    const user = new User(req.parameter);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    const user = new User({...req.parameter, password:hashedPassword});
     let userValidateRes = validator.isValidUser(req.parameter);
 
     console.log("validating user...");
     if (userValidateRes?.isValid) {
-      User.register(user, req.parameter.password, function (err, msg) {
-        console.log("control inside the ", msg);
+      // User.register(user, req.parameter.password, function (err, msg) {
+      //   console.log("control inside the ", msg);
 
-        if (err) {
-          return next(err);
-        } else {
-          return res
-            .status(201)
-            .json({ success: true, message: "User created successfully" });
-        }
+      //   if (err) {
+      //     return next(err);
+      //   } else {
+      //     return res
+      //       .status(201)
+      //       .json({ success: true, message: "User created successfully" });
+      //   }
+      // });
+
+      await User.save(user);
+      const token = jwt.sign({ userId: user._id, role:user.role, isActive: user.isActive }, "secretKey", {
+        expiresIn: "1h",
       });
+    
+     return  res.json({success: true, message: "User registered successfully" ,token});
     } else {
       return res.status(401).json(userValidateRes);
     }
@@ -66,22 +78,26 @@ module.exports.getProfiles = async (req, res, next) => {
   }
 };
 
-module.exports.login = async (mobile, password) => {
+module.exports.login = async (req,res,next) => {
   console.log("control inside login...");
-  let user = await User.find({ mobile });
-
-  if (!user || user.length < 1) {
-    throw { status: 401, message: "Invalid credentials" };
-  }
-  user = user[0];
-
-  const isPasswordValid = user.validPassword(password);
-
-  if (!isPasswordValid) {
-    throw { status: 401, message: "Wrong credentials" };
+  const {mobile,password} = req.parameter;
+  const user = await User.findOne({ mobile });
+  if (!user) {
+    return res.status(400).json({ message: "Invalid credentials" });
   }
 
-  return user;
+  // Check password
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    return res.status(400).json({ message: "Invalid credentials" });
+  }
+
+  // Generate JWT token
+  const token = jwt.sign({ userId: user._id, role:user.role, isActive: user.isActive }, "secretKey", {
+    expiresIn: "1h",
+  });
+
+ return  res.json({success: true, token});
 };
 
 // Retrieve the list of users using pagination
