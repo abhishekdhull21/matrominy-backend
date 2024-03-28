@@ -19,8 +19,7 @@ const userNoAuthRouter = express.Router();
 userNoAuthRouter.post('/signup',register);
 // userNoAuthRouter.get('/', viewProfile);
 
-  userNoAuthRouter.post(
-    "/login",login);
+  userNoAuthRouter.post("/login", login);
 
 // Private Auth Route
 userRouter.get('/count/of',getCount);

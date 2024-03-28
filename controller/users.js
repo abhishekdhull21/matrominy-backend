@@ -17,10 +17,7 @@ module.exports.register = async (req, res, next) => {
   // const userMeta = { username:req.parameter?.username, password:req.parameter?.password };
 
   try {
-    const salt = await bcrypt.genSalt(10);
-    const {password} = req.parameter;
-    const hashedPassword = await bcrypt.hash(password, salt);
-    const user = new User({...req.parameter, password:hashedPassword});
+    const user = new User(req.parameter);
     let userValidateRes = validator.isValidUser(req.parameter);
 
     console.log("validating user...");
@@ -88,17 +85,21 @@ module.exports.login = async (req,res,next) => {
   }
 
   // Check password
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    return res.status(400).json({ message: "Invalid credentials" });
-  }
-
-  // Generate JWT token
-  const token = jwt.sign({ userId: user._id, role:user.role, isActive: user.isActive }, "secretKey", {
-    expiresIn: "1h",
+  const userPassword = user.password;
+   bcrypt.compare(password?.trim(), userPassword?.trim(), (err,success) =>{
+    console.log("login success",err)
+    if (!success) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+  
+    // Generate JWT token
+    const token = jwt.sign({ userId: user._id, role:user.role, isActive: user.isActive }, "secretKey", {
+      expiresIn: "1h",
+    });
+  
+   return  res.json({success: true, token});
   });
 
- return  res.json({success: true, token});
 };
 
 // Retrieve the list of users using pagination

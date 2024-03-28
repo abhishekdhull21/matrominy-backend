@@ -9,9 +9,10 @@
 //     res.status(401).json({ error: 'Unauthorized' }); // Return 401 for unauthenticated users
 //   }
 // };
+const jwt = require('jsonwebtoken');
 
 function isAuthenticated(req, res, next) {
-  const token = req.header('Authorization');
+  let token = req.header('Authorization');
 
   if (!token) {
       req.isAuthenticated = false;
@@ -19,6 +20,11 @@ function isAuthenticated(req, res, next) {
   }
 
   try {
+      console.log("token",token)
+      const tokenArray = token.split(' ');
+      if (tokenArray.length === 2 && tokenArray[0] === 'Bearer') {
+        token = tokenArray[1]; // Extract token from the array
+      } 
       const decoded = jwt.verify(token, 'secretKey');
       req.userId = decoded.userId;
       req.isAuthenticated = true;
