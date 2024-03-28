@@ -5,10 +5,10 @@ module.exports.savePayment = async (req, res, next) => {
   console.log("control inside the controller.savePayment()");
   const data = req.parameter?.data;
   try {
-    if (!data?.screenshotUrl)
+    if (!data?.screenshotUrl && !data.transaction)
       throw {
         status: 401,
-        message: "Please provide a screenshot of payment...",
+        message: "Please provide a screenshot or transaction ID of payment...",
       };
     Payment.savePayment({ ...data, userID: req.user._id });
     return res.status(200).json({ success: true });
