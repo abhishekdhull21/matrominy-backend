@@ -10,8 +10,9 @@
 //   }
 // };
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-function isAuthenticated(req, res, next) {
+async function isAuthenticated(req, res, next) {
   let token = req.header('Authorization');
 
   if (!token) {
@@ -27,6 +28,7 @@ function isAuthenticated(req, res, next) {
       } 
       const decoded = jwt.verify(token, 'secretKey');
       req.userId = decoded.userId;
+      req.user = await User.findUser({_id:req.userId});
       req.isAuthenticated = true;
       next();
   } catch (err) {

@@ -109,6 +109,10 @@ schema.methods.validPassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
 
+schema.statics.findUser = async function (condition, projection) {
+  return await this.findOne(condition,{password:0,...projection});
+}
+
 schema.statics.addUsers = function (users = []) {
   console.log("control inside the addUsers");
 
