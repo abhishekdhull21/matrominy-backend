@@ -4,7 +4,8 @@ const commonSchema = require("./common");
 const schema = new mongoose.Schema({
     userID: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true }, // Reference to the user who made the payment
     amount: { type: Number }, // Amount of the payment
-    screenshotUrl: { type: String, required: true }, // URL or path to the payment info screenshot
+    transaction:String,
+    screenshotUrl: { type: String, }, // URL or path to the payment info screenshot
     status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' }, // Status of payment approval
     remark:{String}
 });
