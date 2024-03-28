@@ -67,3 +67,9 @@ return ['PRO','ADMIN'].includes((user?.role || "").toUpperCase());
 module.exports.noOfProfilesUserView = (number)=>{
   return number || process.env.USER_CAN_VIEW_PROFILE || 5;
 }
+
+module.exports.subtractYearsFromDate = (years) =>{
+  const currentDate = new Date();
+  const newDate = new Date(currentDate.getFullYear() - years, currentDate.getMonth(), currentDate.getDate());
+  return newDate;
+}

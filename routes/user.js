@@ -2,7 +2,7 @@ const express = require('express');
 const passport = require('passport');
 
 
-const { register, getUsers, viewProfile, updateProfile, favoriteProfile, getFavoriteProfile, getFavoriteProfileCount, getCount, getProfiles, login } = require('../controller/users');
+const { register, getUsers, viewProfile, updateProfile, favoriteProfile, getFavoriteProfile, getFavoriteProfileCount, getCount, getProfiles, login, findMatch } = require('../controller/users');
 const userRouter = express.Router();
 const userNoAuthRouter = express.Router();
 
@@ -28,8 +28,9 @@ userRouter.get('/favorite/all',getFavoriteProfile);
 userRouter.get('/profile/:id',viewProfile);
 userRouter.get('/profile',viewProfile);
 userRouter.get('/profiles',getProfiles);
+userRouter.post('/match',findMatch);
 userRouter.put('/profile/:id',updateProfile);
 userRouter.put('/profile',updateProfile);
 
-// userNoAuthRouter.get('/:id', getUsers);
+userNoAuthRouter.get('/getAll', getUsers);
 module.exports = { userRouter, userNoAuthRouter }; 

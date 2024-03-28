@@ -1,6 +1,10 @@
 const express = require('express');
 const createError = require('http-errors');
+const path = require('path');
+
 const app = express();
+app.use(express.static('multimedia'));
+app.use('/multimedia', express.static(path.join(__dirname, 'multimedia')));
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');

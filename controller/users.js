@@ -10,6 +10,7 @@ const {
   noOfProfilesUserView,
   LeadCountType,
   LeadType,
+  subtractYearsFromDate,
 } = require("../utils/common");
 
 module.exports.register = async (req, res, next) => {
@@ -36,7 +37,7 @@ module.exports.register = async (req, res, next) => {
 
       await user.save();
       const token = jwt.sign({ userId: user._id, role:user.role, isActive: user.isActive }, "secretKey", {
-        expiresIn: "1h",
+        expiresIn: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30),
       });
     
      return  res.json({success: true, message: "User registered successfully" ,token});
@@ -75,6 +76,41 @@ module.exports.getProfiles = async (req, res, next) => {
     return next({ status: 401, error: e?.message || "something went wrong" });
   }
 };
+module.exports.findMatch = async (req, res, next) => {
+  console.log("control inside the getProfiles");
+  const query = req.parameter.query;
+  const condition = {    isActive: true,};
+
+  condition.lookingFor = {$regex:query.me2,"$options": "i"};
+  condition.gender = {$regex:query.me,"$options": "i"}
+  condition.dob = {
+    '$gte':subtractYearsFromDate(query.age_b),
+    '$lte':subtractYearsFromDate(query.age_a),
+  }
+  if(query.country){
+  condition.address = {
+    country: query.country
+  }
+}
+  try {
+    const users = await User.getUsers(
+      {
+        condition,
+      },
+      {
+        name: 1,
+        last: 1,
+        username: 1,
+        gender: 1,
+        dob: 1,
+        images: 1,
+      }
+    );
+    return res.json({ success: true, profiles: users });
+  } catch (e) {
+    return next({ status: 401, error: e?.message || "something went wrong" });
+  }
+};
 
 module.exports.login = async (req,res,next) => {
   console.log("control inside login...");
@@ -94,7 +130,7 @@ module.exports.login = async (req,res,next) => {
   
     // Generate JWT token
     const token = jwt.sign({ userId: user._id, role:user.role, isActive: user.isActive }, "secretKey", {
-      expiresIn: "1h",
+      expiresIn: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30),
     });
   
    return  res.json({success: true, token});
@@ -130,21 +166,22 @@ module.exports.getUsers = async (req, res, next) => {
   // For now we return the users based on the current requesting user
   // but further we need to update the viewing map place of USER_CREATE_AUTHORIZED_USER_MAP
 
-  if (
-    req.parameter.type &&
-    USER_CREATE_AUTHORIZED_USER_MAP[req.user.role].includes(req.parameter.type)
-  ) {
-    condition.role = { $in: [req.parameter.type] };
-  } else if (req.parameter.type) {
-    return next({
-      status: 400,
-      message: "Bad Request: Not authorized user to perform this action",
-    });
-  } else {
-    condition.role = {
-      $in: USER_CREATE_AUTHORIZED_USER_MAP[req.user.role || 0],
-    };
-  }
+  // if (
+  //   req.parameter.type &&
+  //   USER_CREATE_AUTHORIZED_USER_MAP[req.user.role].includes(req.parameter.type)
+  // ) {
+    // condition.role = { $in: [req.parameter.type] };
+  // } else if (req.parameter.type) {
+  //   return next({
+  //     status: 400,
+  //     message: "Bad Request: Not authorized user to perform this action",
+  //   });
+  // }
+  //  else {
+    // condition.role = {
+    //   $in: USER_CREATE_AUTHORIZED_USER_MAP[req.user.role || 0],
+    // };
+  // }
   console.log("condition:", condition);
   const users = await User.getUsers({
     condition,

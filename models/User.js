@@ -125,14 +125,13 @@ schema.statics.getUsers = async function ({
   currentUserRole = 6,
 } = {}) {
   try {
-    console.log("Control inside the getUsers");
-
+    console.log("Control inside the getUsers",condition);
     const skip = (page - 1) * pageSize;
 
     // const projection = defineProjection(currentUserRole);
     // const users = await this.find(condition, projection)
-    const users = await this.find(condition).skip(skip).limit(pageSize);
-
+    // const users = await this.find(condition).skip(skip).limit(pageSize);
+    const users = await this.find(condition);
     return users;
   } catch (error) {
     console.error("Error in getUsers:", error.message);
