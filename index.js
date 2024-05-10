@@ -96,7 +96,7 @@ console.log("current env: ", app.get('env'))
 // app.use(passport.initialize());
 // app.use(passport.session());
 
-app.use(isAuthenticated);
+// app.use(isAuthenticated);
 
 
 app.get("/api/auth",(req,res,next)=>{

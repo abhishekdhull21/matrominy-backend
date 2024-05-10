@@ -7,7 +7,7 @@ const { number } = require("joi");
 
 const schema = new mongoose.Schema({
   email: { type: String },
-  name: String,
+  full_name: String,
   last: String,
   username: {
     type: String,
