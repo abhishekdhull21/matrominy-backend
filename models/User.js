@@ -40,13 +40,13 @@ const schema = new mongoose.Schema({
   },
   gender: {
     type: String,
-    required: true,
+    // required: true,
     enum: ["Male", "Female"],
     default: "Male",
   },
   lookingFor: {
     type: String,
-    required: true,
+    // required: true,
     enum: ["Male", "Female"],
     default: "Female",
   },
