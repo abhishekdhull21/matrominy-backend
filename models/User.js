@@ -21,6 +21,8 @@ const schema = new mongoose.Schema({
   images: [{ type: String }],
   bio: { type: String },
   dob: { type: Date },
+  occupation: String,
+  about: String,
   hobby: String,
   personType: String,
   height: String,
@@ -48,8 +50,10 @@ const schema = new mongoose.Schema({
     enum: ["Male", "Female"],
     default: "Female",
   },
-  isSingle: { type: Boolean, default: true },
+  isSingle: { type: String, default: true },
+  religion: String,
   address: {
+    streetAddress: String,
     zipCode: String,
     city: String,
     state: String,
@@ -63,7 +67,7 @@ const schema = new mongoose.Schema({
   },
   isActive: { type: Boolean, default: true },
   profileViewUpto: Number,
-  password:String,
+  password: String,
   profileViewed: { type: Number, default: 0 },
 });
 
@@ -110,8 +114,8 @@ schema.methods.validPassword = function (password) {
 };
 
 schema.statics.findUser = async function (condition, projection) {
-  return await this.findOne(condition,{password:0,...projection});
-}
+  return await this.findOne(condition, { password: 0, ...projection });
+};
 
 schema.statics.addUsers = function (users = []) {
   console.log("control inside the addUsers");
@@ -125,7 +129,7 @@ schema.statics.getUsers = async function ({
   currentUserRole = 6,
 } = {}) {
   try {
-    console.log("Control inside the getUsers",condition);
+    console.log("Control inside the getUsers", condition);
     const skip = (page - 1) * pageSize;
 
     // const projection = defineProjection(currentUserRole);
@@ -139,7 +143,7 @@ schema.statics.getUsers = async function ({
   }
 };
 
-schema.statics.viewProfile = async function ({ userID,isSelf } = {}) {
+schema.statics.viewProfile = async function ({ userID, isSelf } = {}) {
   console.log("Control inside the viewProfile");
 
   let fields = {
@@ -149,26 +153,26 @@ schema.statics.viewProfile = async function ({ userID,isSelf } = {}) {
     gender: 1,
     images: 1,
     bio: 1,
-    age:1
+    age: 1,
   };
-  if(isSelf){
+  if (isSelf) {
     fields = {
       ...fields,
-      mobile:1,
-      email:1,
-      lookingFor:1,
-      isSingle:1,
-      address:1,
-      lifestyle:1,
-      hobby:1,
-      personType:1,
-      height:1,
-      weight:1,
+      mobile: 1,
+      email: 1,
+      lookingFor: 1,
+      isSingle: 1,
+      address: 1,
+      lifestyle: 1,
+      hobby: 1,
+      personType: 1,
+      height: 1,
+      weight: 1,
       hairColor: 1,
       eyeColor: 1,
       bodyType: 1,
       ethnicity: 1,
-    }
+    };
   }
   try {
     const user = await this.findById(userID, fields);
