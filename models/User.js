@@ -147,6 +147,7 @@ schema.statics.viewProfile = async function ({ userID, isSelf } = {}) {
   console.log("Control inside the viewProfile");
 
   let fields = {
+    full_name:1,
     name: 1,
     last: 1,
     username: 1,
@@ -154,6 +155,8 @@ schema.statics.viewProfile = async function ({ userID, isSelf } = {}) {
     images: 1,
     bio: 1,
     age: 1,
+    dob:1,
+    images:1,
   };
   if (isSelf) {
     fields = {
