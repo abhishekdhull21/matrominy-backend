@@ -194,10 +194,11 @@ module.exports.getUsers = async (req, res, next) => {
 
 // View Profile
 module.exports.viewProfile = async function (req, res, next) {
+  console.log("Inside Profile View");
   // check user pro or not
   const user = req.user;
-  const profileUserId = req.params["id"] || user._id;
-  const isSelf = profileUserId === user._id;
+  const profileUserId = req.query.id ||  req.params["id"] || user?._id;
+  const isSelf = true // profileUserId === user?._id;
   if (!profileUserId) {
     return next({
       status: 401,
@@ -217,14 +218,14 @@ module.exports.viewProfile = async function (req, res, next) {
 
   const profile = await User.viewProfile({ userID: profileUserId,isSelf });
   const leadCondition = {
-    type: LeadType.PROFILE_VIEW,
+    type: LeadType?.PROFILE_VIEW,
     profileViewed: profileUserId,
-    userID: user._id,
+    userID: user?._id,
   };
   if (!isSelf) {
     const leadInDB = await Lead.getLead(leadCondition);
     if (!leadInDB.length) {
-      await User.increaseProfileViewed({ userID: user._id });
+      await User.increaseProfileViewed({ userID: user?._id });
     }
     Lead.saveLead(leadCondition);
   }
